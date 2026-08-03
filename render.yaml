@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: luxe-dental-house
+    runtime: python
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: python manage.py migrate && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: 127.0.0.1,localhost
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
+      - key: DATA_DIR
+        value: /var/data
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: ORDER_NOTIFICATION_EMAIL
+        sync: false
+      - key: EMAIL_TIMEOUT
+        value: "15"
+    disk:
+      name: luxe-dental-data
+      mountPath: /var/data
+      sizeGB: 1

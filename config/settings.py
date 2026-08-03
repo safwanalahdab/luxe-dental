@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -30,13 +31,29 @@ def env_bool(name, default=False):
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7^na#auabohu188ez%1$hp%u-)toh@%s9you*459l+y*5r141*'
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env_bool("DEBUG", True)
 
-ALLOWED_HOSTS = []
+# Use a harmless local-only key for development. Production must provide its
+# own secret through the environment.
+SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = "django-insecure-local-development-only-key"
+    else:
+        raise ImproperlyConfigured("SECRET_KEY must be set when DEBUG is False.")
+
+
+def env_list(name, default=""):
+    return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
+
+
+ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "127.0.0.1,localhost")
+render_hostname = os.getenv("RENDER_EXTERNAL_HOSTNAME", "").strip()
+if render_hostname and render_hostname not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(render_hostname)
+
+CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
 
 
 # Application definition
@@ -54,6 +71,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -82,14 +100,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_HSTS_SECONDS = 31_536_000 if not DEBUG else 0
+
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+data_dir_value = os.getenv("DATA_DIR", "").strip()
+DATA_DIR = Path(data_dir_value) if data_dir_value else BASE_DIR
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': DATA_DIR / 'db.sqlite3',
     }
 }
 
@@ -128,10 +156,25 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media" 
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
+    },
+}
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = DATA_DIR / "media"
+MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
 
 # Order notification email
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

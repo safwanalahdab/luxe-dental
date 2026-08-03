@@ -392,10 +392,10 @@ class CheckoutTests(TestCase):
 
     @override_settings(
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-        EMAIL_HOST_USER="amermashaan6@gmail.com",
+        EMAIL_HOST_USER="notifications@example.com",
         EMAIL_HOST_PASSWORD="test-app-password",
-        DEFAULT_FROM_EMAIL="amermashaan6@gmail.com",
-        ORDER_NOTIFICATION_EMAIL="amermashaan6@gmail.com",
+        DEFAULT_FROM_EMAIL="notifications@example.com",
+        ORDER_NOTIFICATION_EMAIL="notifications@example.com",
     )
     def test_successful_checkout_sends_one_complete_email_from_saved_order(self):
         self.set_cart(
@@ -411,7 +411,7 @@ class CheckoutTests(TestCase):
         self.assertEqual(order.items.count(), 2)
         self.assertEqual(len(mail.outbox), 1)
         email = mail.outbox[0]
-        self.assertEqual(email.to, ["amermashaan6@gmail.com"])
+        self.assertEqual(email.to, ["notifications@example.com"])
         self.assertIn(f"#{order.pk}", email.subject)
         for value in (
             "Test Customer",
@@ -438,10 +438,10 @@ class CheckoutTests(TestCase):
 
     @override_settings(
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-        EMAIL_HOST_USER="amermashaan6@gmail.com",
+        EMAIL_HOST_USER="notifications@example.com",
         EMAIL_HOST_PASSWORD="test-app-password",
-        DEFAULT_FROM_EMAIL="amermashaan6@gmail.com",
-        ORDER_NOTIFICATION_EMAIL="amermashaan6@gmail.com",
+        DEFAULT_FROM_EMAIL="notifications@example.com",
+        ORDER_NOTIFICATION_EMAIL="notifications@example.com",
     )
     def test_email_omits_empty_notes(self):
         self.set_cart()
@@ -453,10 +453,10 @@ class CheckoutTests(TestCase):
         self.assertNotIn("ملاحظات العميل:", mail.outbox[0].body)
 
     @override_settings(
-        EMAIL_HOST_USER="amermashaan6@gmail.com",
+        EMAIL_HOST_USER="notifications@example.com",
         EMAIL_HOST_PASSWORD="test-app-password",
-        DEFAULT_FROM_EMAIL="amermashaan6@gmail.com",
-        ORDER_NOTIFICATION_EMAIL="amermashaan6@gmail.com",
+        DEFAULT_FROM_EMAIL="notifications@example.com",
+        ORDER_NOTIFICATION_EMAIL="notifications@example.com",
     )
     @patch("orders.emails.send_mail", side_effect=OSError("SMTP unavailable"))
     def test_email_failure_keeps_order_items_and_success_redirect(self, _send_mail):
@@ -472,9 +472,9 @@ class CheckoutTests(TestCase):
 
     @override_settings(
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-        EMAIL_HOST_USER="amermashaan6@gmail.com",
+        EMAIL_HOST_USER="notifications@example.com",
         EMAIL_HOST_PASSWORD="test-app-password",
-        ORDER_NOTIFICATION_EMAIL="amermashaan6@gmail.com",
+        ORDER_NOTIFICATION_EMAIL="notifications@example.com",
     )
     def test_unsuccessful_checkouts_do_not_send_email(self):
         response = self.client.post(
