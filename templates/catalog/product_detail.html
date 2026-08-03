@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ product.name }} | Luxe Dental House{% endblock %}
+{% block page %}dental{% endblock %}
+{% block content %}
+<section class="page-hero"><div class="container"><div class="page-hero-shell"><div class="breadcrumbs"><a href="{% url 'catalog:home' %}">الرئيسية</a><span>/</span><a href="{% url 'catalog:product_list' %}">المنتجات</a><span>/</span><span>{{ product.name }}</span></div></div></div></section>
+<section class="container product-detail">
+  <div class="product-gallery"><div class="product-main-image">{% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% else %}<img src="{% static 'images/products/composite-kit.svg' %}" alt="صورة افتراضية">{% endif %}</div></div>
+  <div class="product-info"><div class="kicker">{{ product.get_product_type_display|default:product.category.name }}{% if product.brand %} · {{ product.brand }}{% endif %}</div><h1>{{ product.name }}</h1><p class="lead">{{ product.description }}</p><div class="product-price">${{ product.price }}</div>
+  {% if product.category.status == "coming_soon" %}<span class="stock out">سيتوفر قريباً</span>{% elif not product.is_available or product.stock_quantity == 0 %}<span class="stock out">غير متوفر</span>{% else %}<span class="stock">متوفر</span><form class="qty-row" method="post" action="{% url 'orders:cart_add' product.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><div class="qty"><input type="number" name="quantity" value="1" min="1" {% if product.stock_quantity is not None %}max="{{ product.stock_quantity }}"{% endif %} aria-label="الكمية"></div><button class="btn btn-primary" type="submit">إضافة إلى السلة</button></form>{% endif %}
+  <div class="specs"><div class="spec-item"><small>العلامة التجارية</small><strong>{{ product.brand|default:"—" }}</strong></div><div class="spec-item"><small>الكمية</small><strong>{% if product.stock_quantity is None %}غير محددة{% else %}{{ product.stock_quantity }}{% endif %}</strong></div><div class="spec-item"><small>القسم</small><strong>{{ product.category.name }}</strong></div><div class="spec-item"><small>النوع</small><strong>{{ product.get_product_type_display|default:"—" }}</strong></div></div></div>
+</section>
+{% if related_products %}<section class="section-sm"><div class="container"><div class="section-head"><h2>منتجات أخرى</h2></div><div class="products-grid">{% for product in related_products %}{% include "catalog/_product_card.html" %}{% endfor %}</div></div></section>{% endif %}
+{% endblock %}

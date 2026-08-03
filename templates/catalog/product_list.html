@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}المستلزمات السنية | Luxe Dental House{% endblock %}
+{% block page %}dental{% endblock %}
+{% block content %}
+<section class="page-hero"><div class="container"><div class="page-hero-shell"><div class="breadcrumbs"><a href="{% url 'catalog:home' %}">الرئيسية</a><span>/</span><span>المستلزمات السنية</span></div><h1>المستلزمات السنية</h1><p>تصفح المنتجات المتاحة من قاعدة بيانات المتجر.</p></div></div></section>
+<section class="section-sm"><div class="container">
+  <nav class="product-type-filters">
+    <a class="type-filter-btn {% if selected_type == 'all' %}active{% endif %}" href="?{% if query %}q={{ query|urlencode }}&{% endif %}type=all">الكل</a>
+    <a class="type-filter-btn {% if selected_type == 'metals' %}active{% endif %}" href="?{% if query %}q={{ query|urlencode }}&{% endif %}type=metals">معدنيات</a>
+    <a class="type-filter-btn {% if selected_type == 'devices' %}active{% endif %}" href="?{% if query %}q={{ query|urlencode }}&{% endif %}type=devices">أجهزة</a>
+    <a class="type-filter-btn {% if selected_type == 'materials' %}active{% endif %}" href="?{% if query %}q={{ query|urlencode }}&{% endif %}type=materials">مواد</a>
+  </nav>
+  <form class="filters" method="get"><input type="hidden" name="type" value="{{ selected_type }}"><input class="input" type="search" name="q" value="{{ query }}" placeholder="ابحث بالاسم أو العلامة أو الوصف"><button class="btn btn-primary" type="submit">بحث</button></form>
+  <div class="results-line"><strong>{{ products|length }} نتيجة</strong></div>
+  <div class="products-grid">{% for product in products %}{% include "catalog/_product_card.html" %}{% empty %}<div class="empty-state" style="grid-column:1/-1"><h3>لا توجد نتائج</h3></div>{% endfor %}</div>
+</div></section>
+{% endblock %}

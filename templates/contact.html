@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}تواصل معنا | Luxe Dental House{% endblock %}
+{% block page %}contact{% endblock %}
+{% block content %}
+<section class="page-hero"><div class="container"><div class="page-hero-shell"><div class="breadcrumbs"><a href="{% url 'catalog:home' %}">الرئيسية</a><span>/</span><span>تواصل معنا</span></div><h1 data-i18n="contact_page_title">تواصل معنا</h1><p data-i18n="contact_page_desc"></p></div></div></section>
+<section class="container contact-grid"><div class="contact-cards"><a class="contact-card contact-card-link" href="tel:+963962092655"><span class="contact-icon">☎</span><div><h3>الهاتف</h3><p dir="ltr">+963962092655</p></div></a><a class="contact-card contact-card-link" href="https://wa.me/963962092655" target="_blank" rel="noopener"><span class="contact-icon">W</span><div><h3>WhatsApp</h3><p dir="ltr">+963962092655</p></div></a></div><div class="contact-primary-panel"><h2 data-i18n="contact_direct_title"></h2><p data-i18n="contact_direct_desc"></p><a class="btn btn-primary" href="https://wa.me/963962092655" target="_blank" rel="noopener" data-i18n="contact_whatsapp">تواصل عبر واتساب</a></div></section>
+{% endblock %}

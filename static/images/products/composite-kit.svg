@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 520" role="img" aria-labelledby="title">
+  <title id="title">Luxe Dental House product placeholder</title>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#edf1f5"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="520" fill="url(#background)"/>
+  <circle cx="320" cy="230" r="112" fill="#f5e9e2"/>
+  <path d="M259 164c23-19 46-2 61-2s38-17 61 2c31 26 11 72-4 104-15 33-25 82-48 82-13 0-8-55-9-55s4 55-9 55c-23 0-33-49-48-82-15-32-35-78-4-104Z" fill="#fff" stroke="#c98968" stroke-width="9" stroke-linejoin="round"/>
+  <text x="320" y="414" text-anchor="middle" fill="#16283f" font-family="Arial, sans-serif" font-size="28" font-weight="700">LUXE DENTAL HOUSE</text>
+</svg>

@@ -1,0 +1,41 @@
+# Virtual environment
+venv/
+.venv/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Django local database and uploaded files
+db.sqlite3
+*.sqlite3
+media/
+
+# Generated static files
+staticfiles/
+
+# IDE and operating system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Frontend dependencies and build output
+node_modules/
+dist/
+build/
+
+# Frontend environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Old standalone frontend prototype
+luxe-dental-frontend/

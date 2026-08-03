@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}السلة | Luxe Dental House{% endblock %}
+{% block page %}cart{% endblock %}
+{% block content %}
+<section class="page-hero"><div class="container"><div class="page-hero-shell"><div class="breadcrumbs"><a href="{% url 'catalog:home' %}">الرئيسية</a><span>/</span><span>السلة</span></div><h1>سلة التسوق</h1><p>راجع المنتجات والكميات قبل المتابعة.</p></div></div></section>
+{% if cart_items %}
+<section class="container cart-layout">
+  <div class="cart-list">
+    {% for item in cart_items %}<article class="cart-item">
+      {% if item.product.image %}<img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">{% else %}<img src="{% static 'images/products/composite-kit.svg' %}" alt="صورة افتراضية">{% endif %}
+      <div><h3><a href="{% url 'catalog:product_detail' item.product.slug %}">{{ item.product.name }}</a></h3><div class="meta">{{ item.product.brand|default:"—" }}</div><div class="price" style="font-size:16px;margin-top:6px">${{ item.product.price }}</div><small>المجموع الفرعي: ${{ item.subtotal }}</small></div>
+      <div class="cart-item-actions">
+        <form method="post" action="{% url 'orders:cart_update' item.product.pk %}">{% csrf_token %}<div class="qty"><input type="number" name="quantity" value="{{ item.quantity }}" min="1" {% if item.product.stock_quantity is not None %}max="{{ item.product.stock_quantity }}"{% endif %}><button type="submit" aria-label="تحديث">✓</button></div></form>
+        <form method="post" action="{% url 'orders:cart_remove' item.product.pk %}">{% csrf_token %}<button class="remove-btn" type="submit">حذف</button></form>
+      </div>
+    </article>{% endfor %}
+  </div>
+  <aside class="summary-card"><h3>ملخص السلة</h3><div class="summary-row"><span>عدد القطع</span><strong>{{ cart_count }}</strong></div><div class="summary-row total"><span>الإجمالي</span><span>${{ cart_total }}</span></div><a class="btn btn-primary" href="{% url 'orders:checkout' %}">متابعة لإتمام الطلب</a><a class="btn btn-outline" href="{% url 'catalog:product_list' %}">متابعة التسوق</a></aside>
+</section>
+{% else %}
+<section class="container section-sm"><div class="empty-state"><h3>السلة فارغة حالياً</h3><p>لم تضف أي منتجات بعد.</p><a class="btn btn-primary" href="{% url 'catalog:product_list' %}" style="margin-top:14px">تصفح المنتجات</a></div></section>
+{% endif %}
+{% endblock %}

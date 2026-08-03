@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}إتمام الطلب | Luxe Dental House{% endblock %}
+{% block page %}checkout{% endblock %}
+{% block content %}
+<section class="page-hero"><div class="container"><div class="page-hero-shell"><div class="breadcrumbs"><a href="{% url 'catalog:home' %}">الرئيسية</a><span>/</span><a href="{% url 'orders:cart_detail' %}">السلة</a><span>/</span><span>إتمام الطلب</span></div><h1>إتمام الطلب</h1><p>أدخل بيانات التواصل ثم راجع ملخص طلبك.</p></div></div></section>
+<section class="container checkout-layout">
+  <form class="form-card" method="post" novalidate>{% csrf_token %}<h2>بيانات العميل</h2>
+    {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-grid">
+      {% for field in form %}<div class="form-group {% if field.name == 'full_name' or field.name == 'address' or field.name == 'notes' %}full{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="muted">(اختياري)</span>{% endif %}</label>{{ field }}{% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>{% endfor %}
+    </div>
+    <button class="btn btn-primary" type="submit" style="margin-top:18px">تأكيد الطلب</button>
+  </form>
+  <aside class="summary-card"><h3>ملخص الطلب</h3>
+    {% for item in cart_items %}<div class="summary-row"><span>{{ item.product.name }} × {{ item.quantity }}</span><strong>${{ item.subtotal }}</strong></div>{% endfor %}
+    <div class="summary-row total"><span>الإجمالي</span><span>${{ cart_total }}</span></div>
+  </aside>
+</section>
+{% endblock %}

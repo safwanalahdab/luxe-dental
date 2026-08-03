@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}تم استلام الطلب | Luxe Dental House{% endblock %}
+{% block page %}success{% endblock %}
+{% block content %}
+<section class="success-wrap">
+  <div class="container">
+    <div class="success-card">
+      <div class="success-icon">✓</div>
+      <h1>تم استلام طلبك بنجاح</h1>
+      <p>سنتواصل معك لمراجعة تفاصيل الطلب.</p>
+      <div class="success-order-line">
+        رقم الطلب: <strong class="order-code">#{{ order.pk }}</strong>
+      </div>
+      <div class="summary-row total">
+        <span>الإجمالي</span>
+        <span>${{ order.total_amount }}</span>
+      </div>
+      <div class="success-actions">
+        <a class="btn btn-whatsapp" href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer">
+          إرسال تفاصيل الطلب عبر WhatsApp
+        </a>
+        <a class="btn btn-primary" href="{% url 'catalog:product_list' %}">
+          العودة إلى المنتجات
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

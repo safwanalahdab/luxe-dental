@@ -1,0 +1,21 @@
+{% load static %}
+<article class="product-card">
+  <a class="product-media" href="{% url 'catalog:product_detail' product.slug %}">
+    {% if product.image %}
+      <img src="{{ product.image.url }}" alt="{{ product.name }}">
+    {% else %}
+      <img src="{% static 'images/products/composite-kit.svg' %}" alt="">
+    {% endif %}
+    {% if not product.is_available or product.stock_quantity == 0 %}<div class="product-badges"><span class="badge out">غير متوفر</span></div>{% endif %}
+  </a>
+  <div class="product-body">
+    <div class="product-meta">{{ product.get_product_type_display|default:product.category.name }}{% if product.brand %} · {{ product.brand }}{% endif %}</div>
+    <h3 class="product-title"><a href="{% url 'catalog:product_detail' product.slug %}">{{ product.name }}</a></h3>
+    <p class="product-desc">{{ product.description }}</p>
+    <div class="product-bottom"><span class="price">${{ product.price }}</span>
+      {% if product.category.status == "active" and product.is_available and product.stock_quantity != 0 %}
+      <form method="post" action="{% url 'orders:cart_add' product.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="add-cart" type="submit" aria-label="إضافة إلى السلة">+</button></form>
+      {% else %}<span class="stock out">{% if product.category.status == "coming_soon" %}قريباً{% else %}غير متوفر{% endif %}</span>{% endif %}
+    </div>
+  </div>
+</article>

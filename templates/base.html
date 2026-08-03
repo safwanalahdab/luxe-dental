@@ -1,0 +1,52 @@
+{% load static %}
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Luxe Dental House">
+  <title>{% block title %}Luxe Dental House{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v=medical-category-final-1">
+</head>
+<body data-page="{% block page %}{% endblock %}">
+<header class="site-header">
+  <div class="container navbar">
+    <a class="brand" href="{% url 'catalog:home' %}">
+      <span class="brand-mark"><img src="{% static 'images/luxe-dental-logo.png' %}" alt="Luxe Dental House logo"></span>
+      <span class="brand-copy"><span class="brand-title"><span class="accent">LUXE</span> DENTAL HOUSE</span><span class="brand-sub">Dental Supplies & Medicines</span></span>
+    </a>
+    <nav class="nav-links" data-nav-links>
+      <a href="{% url 'catalog:home' %}" data-i18n="nav_home">الرئيسية</a>
+      <a href="{% url 'catalog:product_list' %}" data-i18n="nav_dental">المستلزمات السنية</a>
+      <a href="{% url 'catalog:home' %}#categories" data-i18n="nav_medical">المعدات الطبية</a>
+      <a href="{% url 'catalog:about' %}" data-i18n="nav_about">من نحن</a>
+      <a href="{% url 'catalog:contact' %}" data-i18n="nav_contact">تواصل معنا</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="lang-btn" data-lang-toggle aria-label="Switch language"><strong data-lang-label>EN</strong></button>
+      <a class="icon-btn cart-btn" href="{% url 'orders:cart_detail' %}" aria-label="السلة">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h2l2.2 10.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L20 7H7"/><circle cx="10" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/></svg>
+        <span class="cart-count">{{ cart_count }}</span>
+      </a>
+      <button class="icon-btn menu-btn" data-menu-toggle aria-label="Menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </div>
+</header>
+<main>
+{% if messages %}<div class="container messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+{% block content %}{% endblock %}
+</main>
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand"><div class="brand-title"><span style="color:var(--copper)">LUXE</span> DENTAL HOUSE</div><p data-i18n="footer_desc"></p></div>
+    <div class="footer-col"><h4 data-i18n="footer_links"></h4><a href="{% url 'catalog:home' %}" data-i18n="nav_home"></a><a href="{% url 'catalog:about' %}" data-i18n="nav_about"></a><a href="{% url 'catalog:contact' %}" data-i18n="nav_contact"></a></div>
+    <div class="footer-col"><h4 data-i18n="footer_categories"></h4><a href="{% url 'catalog:product_list' %}" data-i18n="nav_dental"></a><a href="{% url 'catalog:home' %}#categories" data-i18n="nav_medical"></a></div>
+    <div class="footer-col"><h4 data-i18n="footer_contact"></h4><a href="tel:+963962092655" dir="ltr">+963962092655</a><a href="https://wa.me/963962092655" target="_blank" rel="noopener" data-i18n="whatsapp"></a></div>
+  </div>
+  <div class="container footer-bottom"><span data-i18n="copyright"></span></div>
+</footer>
+<a class="whatsapp-float" href="https://wa.me/963962092655" target="_blank" rel="noopener" aria-label="WhatsApp">W</a>
+<script src="{% static 'js/i18n.js' %}"></script>
+<script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

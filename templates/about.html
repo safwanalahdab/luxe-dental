@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}من نحن | Luxe Dental House{% endblock %}
+{% block page %}about{% endblock %}
+{% block content %}
+<section class="page-hero"><div class="container"><div class="page-hero-shell"><div class="breadcrumbs"><a href="{% url 'catalog:home' %}">الرئيسية</a><span>/</span><span>من نحن</span></div><h1 data-i18n="about_page_title">من نحن</h1><p data-i18n="about_page_desc"></p></div></div></section>
+<section class="section-sm"><div class="container about-shell"><div class="about-visual"><img src="{% static 'images/luxe-dental-logo.png' %}" alt="Luxe Dental House"><h3>LUXE DENTAL HOUSE</h3><p>Dental Supplies & Medicines</p></div><div class="about-copy"><div class="eyebrow" data-i18n="about_eyebrow"></div><h2 data-i18n="about_title"></h2><p data-i18n="about_desc"></p><div class="about-points"><div class="about-point"><span class="dot">01</span><strong data-i18n="about_point_1"></strong></div><div class="about-point"><span class="dot">02</span><strong data-i18n="about_point_2"></strong></div><div class="about-point"><span class="dot">03</span><strong data-i18n="about_point_3"></strong></div><div class="about-point"><span class="dot">04</span><strong data-i18n="about_point_4"></strong></div></div></div></div></section>
+{% endblock %}
