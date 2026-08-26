@@ -12,7 +12,7 @@
     <a class="type-filter-btn {% if selected_type == 'materials' %}active{% endif %}" href="?{% if query %}q={{ query|urlencode }}&{% endif %}type=materials">مواد</a>
   </nav>
   <form class="filters" method="get"><input type="hidden" name="type" value="{{ selected_type }}"><input class="input" type="search" name="q" value="{{ query }}" placeholder="ابحث بالاسم أو العلامة أو الوصف"><button class="btn btn-primary" type="submit">بحث</button></form>
-  <div class="results-line"><strong>{{ products|length }} نتيجة</strong></div>
-  <div class="products-grid">{% for product in products %}{% include "catalog/_product_card.html" %}{% empty %}<div class="empty-state" style="grid-column:1/-1"><h3>لا توجد نتائج</h3></div>{% endfor %}</div>
+  <div class="results-line"><strong>{{ products|length }} نتيجة</strong>{% include "catalog/_product_view_toggle.html" %}</div>
+  <div class="products-grid" data-product-grid>{% for product in products %}{% include "catalog/_product_card.html" %}{% empty %}<div class="empty-state" style="grid-column:1/-1"><h3>لا توجد نتائج</h3></div>{% endfor %}</div>
 </div></section>
 {% endblock %}

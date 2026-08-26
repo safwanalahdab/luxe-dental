@@ -9,6 +9,22 @@ class Cart:
     def __init__(self, request):
         self.session = request.session
         self.data = self.session.get(self.SESSION_KEY, {})
+        self._remove_missing_products()
+
+    def _remove_missing_products(self):
+        if not self.data:
+            return
+        existing_ids = {
+            str(product_id)
+            for product_id in Product.objects.filter(
+                pk__in=self.data.keys()
+            ).values_list("pk", flat=True)
+        }
+        missing_ids = set(self.data) - existing_ids
+        if missing_ids:
+            for product_id in missing_ids:
+                self.data.pop(product_id)
+            self._save()
 
     @staticmethod
     def validate_quantity(quantity):

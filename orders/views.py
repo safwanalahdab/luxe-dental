@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.db import transaction
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
@@ -13,6 +14,13 @@ from .forms import CheckoutForm
 from .models import Order, OrderItem
 
 WHATSAPP_STORE_NUMBER = "963962092655"
+
+
+def is_ajax_request(request):
+    return (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or "application/json" in request.headers.get("Accept", "")
+    )
 
 
 def redirect_to_safe_next(request, fallback="catalog:product_list"):
@@ -71,13 +79,40 @@ def cart_detail(request):
 
 @require_POST
 def cart_add(request, product_id):
-    product = get_object_or_404(Product.objects.select_related("category"), pk=product_id)
+    is_ajax = is_ajax_request(request)
+    products = Product.objects.select_related("category")
+    if is_ajax:
+        product = products.filter(pk=product_id).first()
+        if product is None:
+            return JsonResponse(
+                {"success": False, "message": "المنتج غير موجود."},
+                status=404,
+            )
+    else:
+        product = get_object_or_404(products, pk=product_id)
+
+    cart = Cart(request)
     try:
-        Cart(request).add(product, request.POST.get("quantity", 1))
+        cart.add(product, request.POST.get("quantity", 1))
     except ValueError as error:
+        if is_ajax:
+            return JsonResponse(
+                {"success": False, "message": str(error)},
+                status=400,
+            )
         messages.error(request, str(error))
     else:
-        messages.success(request, f"تمت إضافة {product.name} إلى السلة.")
+        message = f"تمت إضافة {product.name} إلى السلة."
+        if is_ajax:
+            return JsonResponse(
+                {
+                    "success": True,
+                    "message": message,
+                    "cart_count": len(cart),
+                    "product_id": product.pk,
+                }
+            )
+        messages.success(request, message)
     return redirect_to_safe_next(request)
 
 

@@ -14,7 +14,7 @@
     <p class="product-desc">{{ product.description }}</p>
     <div class="product-bottom"><span class="price">${{ product.price }}</span>
       {% if product.category.status == "active" and product.is_available and product.stock_quantity != 0 %}
-      <form method="post" action="{% url 'orders:cart_add' product.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="add-cart" type="submit" aria-label="إضافة إلى السلة">+</button></form>
+      <form method="post" action="{% url 'orders:cart_add' product.pk %}" data-cart-add-form>{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="add-cart" type="submit" aria-label="إضافة إلى السلة">+</button></form>
       {% else %}<span class="stock out">{% if product.category.status == "coming_soon" %}قريباً{% else %}غير متوفر{% endif %}</span>{% endif %}
     </div>
   </div>

@@ -48,6 +48,22 @@ class CatalogViewsTests(TestCase):
         self.assertContains(response, "Test product")
         self.assertNotContains(response, "Hidden product")
 
+    def test_product_collections_include_shared_view_controls(self):
+        for name in ("home", "product_list"):
+            response = self.client.get(reverse(f"catalog:{name}"))
+            self.assertContains(response, 'data-product-view="grid"')
+            self.assertContains(response, 'data-product-view="list"')
+            self.assertContains(response, "data-product-grid")
+
+    def test_product_view_keeps_existing_add_to_cart_form(self):
+        response = self.client.get(reverse("catalog:product_list"))
+        self.assertContains(
+            response,
+            reverse("orders:cart_add", args=[self.product.pk]),
+        )
+        self.assertContains(response, 'name="next"')
+        self.assertContains(response, "csrfmiddlewaretoken")
+
     def test_invalid_type_is_treated_as_all(self):
         response = self.client.get(reverse("catalog:product_list"), {"type": "invalid"})
         self.assertEqual(response.context["selected_type"], "all")

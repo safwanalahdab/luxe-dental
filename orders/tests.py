@@ -62,9 +62,93 @@ class CartTests(TestCase):
     def session_cart(self):
         return self.client.session.get("cart", {})
 
+    def ajax_add(self, product=None, data=None):
+        return self.client.post(
+            self.add_url(product),
+            data or {"quantity": 1},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            HTTP_ACCEPT="application/json",
+        )
+
     def test_available_product_can_be_added(self):
         self.client.post(self.add_url(), {"quantity": 2})
         self.assertEqual(self.session_cart(), {str(self.product.pk): 2})
+
+    def test_traditional_add_still_redirects(self):
+        response = self.client.post(self.add_url(), {"quantity": 1})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.session_cart(), {str(self.product.pk): 1})
+
+    def test_ajax_add_returns_json_without_flash_message(self):
+        response = self.ajax_add(data={"quantity": 1})
+
+        self.assertEqual(
+            response.wsgi_request.headers["X-Requested-With"],
+            "XMLHttpRequest",
+        )
+        self.assertEqual(
+            response.wsgi_request.headers["Accept"],
+            "application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("Location", response.headers)
+        self.assertTrue(
+            response.headers["Content-Type"].startswith("application/json")
+        )
+        self.assertEqual(
+            response.json(),
+            {
+                "success": True,
+                "message": f"تمت إضافة {self.product.name} إلى السلة.",
+                "cart_count": 1,
+                "product_id": self.product.pk,
+            },
+        )
+        self.assertEqual(self.session_cart(), {str(self.product.pk): 1})
+        self.assertEqual(list(get_messages(response.wsgi_request)), [])
+
+    def test_ajax_add_same_product_updates_cart_count(self):
+        self.ajax_add(data={"quantity": 1})
+        response = self.ajax_add(data={"quantity": 2})
+
+        self.assertEqual(response.json()["cart_count"], 3)
+        self.assertEqual(self.session_cart(), {str(self.product.pk): 3})
+
+    def test_ajax_invalid_quantity_returns_error_without_changing_cart(self):
+        response = self.ajax_add(data={"quantity": "invalid"})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["success"])
+        self.assertEqual(self.session_cart(), {})
+
+    def test_ajax_product_validation_errors_preserve_cart(self):
+        self.client.post(self.add_url(), {"quantity": 1})
+        original = self.session_cart().copy()
+        cases = (
+            (self.unavailable, {"quantity": 1}),
+            (self.product, {"quantity": 6}),
+        )
+        for product, data in cases:
+            with self.subTest(product=product):
+                response = self.ajax_add(product, data)
+                self.assertEqual(response.status_code, 400)
+                self.assertFalse(response.json()["success"])
+                self.assertEqual(self.session_cart(), original)
+
+    def test_ajax_missing_product_returns_json_404(self):
+        response = self.client.post(
+            reverse("orders:cart_add", args=[999999]),
+            {"quantity": 1},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            HTTP_ACCEPT="application/json",
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.json(),
+            {"success": False, "message": "المنتج غير موجود."},
+        )
+        self.assertEqual(self.session_cart(), {})
 
     def test_add_from_product_list_redirects_to_same_page_with_query(self):
         next_url = "/products/?type=devices&q=material"
@@ -89,7 +173,11 @@ class CartTests(TestCase):
             follow=True,
         )
         self.assertContains(response, f"تمت إضافة {self.product.name} إلى السلة.")
-        self.assertContains(response, '<span class="cart-count">2</span>', html=True)
+        self.assertContains(
+            response,
+            '<span class="cart-count" data-cart-count>2</span>',
+            html=True,
+        )
         messages = [str(message) for message in get_messages(response.wsgi_request)]
         self.assertIn(f"تمت إضافة {self.product.name} إلى السلة.", messages)
 
@@ -156,6 +244,20 @@ class CartTests(TestCase):
         cart = Cart(request)
         self.assertEqual(len(cart), 3)
         self.assertEqual(cart.get_total_price(), Decimal("37.50"))
+
+    def test_deleted_product_is_removed_from_cart_session(self):
+        session = self.client.session
+        product_id = str(self.product.pk)
+        session["cart"] = {product_id: 3}
+        session.save()
+        self.product.delete()
+
+        request = type("Request", (), {"session": session})()
+        cart = Cart(request)
+
+        self.assertEqual(list(cart), [])
+        self.assertEqual(len(cart), 0)
+        self.assertNotIn(product_id, session["cart"])
 
     def test_mutation_endpoints_reject_get_without_changing_cart(self):
         self.client.post(self.add_url(), {"quantity": 1})
