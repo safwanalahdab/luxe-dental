@@ -1,11 +1,18 @@
 (function () {
   const STORAGE_LANG = "luxe_lang";
   const STORAGE_PRODUCT_VIEW = "luxe_product_view";
+  const CHECKOUT_PROFILE_KEY = "luxeDental.checkoutProfile.v1";
+  const CHECKOUT_PROFILE_MAX_AGE = 180 * 24 * 60 * 60 * 1000;
+  const CHECKOUT_PROFILE_FIELDS = ["full_name", "phone", "city", "address"];
   const i18n = window.LUXE_I18N || {};
   let toastTimer;
 
   function getLang() {
-    return localStorage.getItem(STORAGE_LANG) || "ar";
+    try {
+      return localStorage.getItem(STORAGE_LANG) || "ar";
+    } catch (error) {
+      return "ar";
+    }
   }
 
   function tr(key) {
@@ -67,6 +74,78 @@
     toastTimer = window.setTimeout(() => toast.classList.remove("show"), 3200);
   }
 
+  function removeCheckoutProfile() {
+    try {
+      localStorage.removeItem(CHECKOUT_PROFILE_KEY);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function readCheckoutProfile() {
+    try {
+      const rawProfile = localStorage.getItem(CHECKOUT_PROFILE_KEY);
+      if (!rawProfile) return null;
+      const profile = JSON.parse(rawProfile);
+      const hasValidFields = CHECKOUT_PROFILE_FIELDS.every(
+        (field) => typeof profile?.[field] === "string"
+      );
+      const hasValidDate = Number.isFinite(profile?.savedAt);
+      if (
+        !hasValidFields
+        || !hasValidDate
+        || Date.now() - profile.savedAt > CHECKOUT_PROFILE_MAX_AGE
+      ) {
+        removeCheckoutProfile();
+        return null;
+      }
+      return profile;
+    } catch (error) {
+      removeCheckoutProfile();
+      return null;
+    }
+  }
+
+  function initializeCheckoutProfile() {
+    const form = document.querySelector("[data-checkout-form]");
+    if (!form) return;
+    const checkbox = form.querySelector("[data-checkout-profile-toggle]");
+    const clearButton = form.querySelector("[data-checkout-profile-clear]");
+    const profile = readCheckoutProfile();
+
+    if (profile) {
+      if (form.dataset.checkoutFormBound !== "true") {
+        CHECKOUT_PROFILE_FIELDS.forEach((field) => {
+          const input = form.elements.namedItem(field);
+          if (input && !input.value.trim()) input.value = profile[field];
+        });
+      }
+      checkbox.checked = true;
+      clearButton.hidden = false;
+    }
+
+    clearButton.addEventListener("click", () => {
+      if (!removeCheckoutProfile()) return;
+      checkbox.checked = false;
+      clearButton.hidden = true;
+      showToast(tr("checkout_profile_cleared"));
+    });
+
+    form.addEventListener("submit", () => {
+      if (!checkbox.checked || !form.checkValidity()) return;
+      const profileToSave = {savedAt: Date.now()};
+      CHECKOUT_PROFILE_FIELDS.forEach((field) => {
+        profileToSave[field] = form.elements.namedItem(field).value.trim();
+      });
+      try {
+        localStorage.setItem(CHECKOUT_PROFILE_KEY, JSON.stringify(profileToSave));
+      } catch (error) {
+        // Saving preferences must never block the normal checkout submission.
+      }
+    });
+  }
+
   async function submitCartForm(form) {
     const button = form.querySelector('button[type="submit"]');
     if (!button || button.disabled) return;
@@ -119,7 +198,11 @@
   setProductView(getProductView(), false);
 
   function setLang(lang) {
-    localStorage.setItem(STORAGE_LANG, lang);
+    try {
+      localStorage.setItem(STORAGE_LANG, lang);
+    } catch (error) {
+      // Language switching still works when browser storage is unavailable.
+    }
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
     document.querySelectorAll("[data-lang-label]").forEach((element) => {
@@ -130,6 +213,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     setLang(getLang());
+    initializeCheckoutProfile();
     setProductView(getProductView(), false);
     document.querySelectorAll("[data-product-view]").forEach((button) => {
       button.addEventListener("click", () => setProductView(button.dataset.productView));

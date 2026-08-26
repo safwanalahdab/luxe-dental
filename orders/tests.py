@@ -339,6 +339,16 @@ class CheckoutTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Checkout Product")
 
+    def test_checkout_renders_optional_device_profile_controls(self):
+        self.set_cart()
+        response = self.client.get(reverse("orders:checkout"))
+
+        self.assertContains(response, "data-checkout-form")
+        self.assertContains(response, "data-checkout-profile-toggle")
+        self.assertContains(response, "data-checkout-profile-clear")
+        self.assertContains(response, 'data-checkout-form-bound="false"')
+        self.assertContains(response, 'type="button"')
+
     def test_empty_cart_cannot_create_order(self):
         response = self.client.post(reverse("orders:checkout"), self.form_data())
         self.assertRedirects(response, reverse("orders:cart_detail"))
@@ -420,6 +430,7 @@ class CheckoutTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["form"]["phone"].value(), "bad")
+        self.assertContains(response, 'data-checkout-form-bound="true"')
         self.assertIn(str(self.product.pk), self.client.session["cart"])
         self.assertEqual(Order.objects.count(), 0)
 

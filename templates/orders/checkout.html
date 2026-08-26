@@ -5,10 +5,14 @@
 {% block content %}
 <section class="page-hero"><div class="container"><div class="page-hero-shell"><div class="breadcrumbs"><a href="{% url 'catalog:home' %}">الرئيسية</a><span>/</span><a href="{% url 'orders:cart_detail' %}">السلة</a><span>/</span><span>إتمام الطلب</span></div><h1>إتمام الطلب</h1><p>أدخل بيانات التواصل ثم راجع ملخص طلبك.</p></div></div></section>
 <section class="container checkout-layout">
-  <form class="form-card" method="post" novalidate>{% csrf_token %}<h2>بيانات العميل</h2>
+  <form class="form-card" method="post" novalidate data-checkout-form data-checkout-form-bound="{{ form.is_bound|yesno:'true,false' }}">{% csrf_token %}<h2>بيانات العميل</h2>
     {% if form.non_field_errors %}<div class="message error">{{ form.non_field_errors }}</div>{% endif %}
     <div class="form-grid">
       {% for field in form %}<div class="form-group {% if field.name == 'full_name' or field.name == 'address' or field.name == 'notes' %}full{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="muted">(اختياري)</span>{% endif %}</label>{{ field }}{% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>{% endfor %}
+    </div>
+    <div class="checkout-profile-actions">
+      <label class="checkout-profile-choice" for="save-checkout-profile"><input id="save-checkout-profile" type="checkbox" data-checkout-profile-toggle><span data-i18n="save_checkout_profile">حفظ بياناتي على هذا الجهاز للطلبات القادمة</span></label>
+      <button class="checkout-profile-clear" type="button" data-checkout-profile-clear data-i18n="clear_checkout_profile" hidden>مسح البيانات المحفوظة</button>
     </div>
     <button class="btn btn-primary" type="submit" style="margin-top:18px">تأكيد الطلب</button>
   </form>
